@@ -43,38 +43,27 @@ USER ubuntu
 ### Postgres
 WORKDIR $POSTGRES_HOME
 ENV POSTGRES_BIN=/usr/lib/postgresql/14/bin
-ENV PGDATA=$HOME/data
-ENV PGCONF=$HOME/conf
-ENV PGLOGS=$HOME/logs
-ARG POSTGRES_PASSWORD=ubuntu
-
-RUN $POSTGRES_BIN/initdb -D $PGDATA && \
-    echo "host all all 0.0.0.0/0 md5" >> $PGDATA/pg_hba.conf && \
-    echo "listen_addresses='*'" >> $PGDATA/postgresql.conf && \
-    $POSTGRES_BIN/pg_ctl -D $PGDATA -l $PGLOGS/logfile start && \
-    psql --command "CREATE USER ubuntu WITH SUPERUSER PASSWORD '$PASSWORD';" && \
-    $POSTGRES_BIN/pg_ctl -D $PGDATA -l $PGLOGS/logfile stop
-
-RUN openssl req -nodes -new -x509 -keyout $PGDATA/server.key -out $PGDATA/server.crt -subj '/C=US/L=Chicago/O=SemanticView/OU=Rax-Dev/CN=localhost'
-RUN chmod 400 $PGDATA/server.crt
-RUN chmod 400 $PGDATA/server.key
+ENV PGDATA=$POSTGRES_HOME/data
+ENV PGCONF=$POSTGRES_HOME/conf
+ENV PGLOGS=$POSTGRES_HOME/logs
+RUN COPY ./postgres .
+RUN mkdir -p $PGDATA $PGCONF $PGLOGS
+RUN chown ubuntu:ubuntu -R $PGDATA $PGCONF $PGLOGS
 
 ### Redis
 WORKDIR $REDIS_HOME
 ENV REDIS_CONF=$REDIS_HOME/conf
 ENV REDIS_DATA=$REDIS_HOME/data
 ENV REDIS_LOGS=$REDIS_HOME/logs
-ARG REDIS_PASSWORD=ubuntu
+COPY ./redis .
 
 RUN mkdir -p $REDIS_CONF $REDIS_DATA $REDIS_LOGS && \
-    echo "requirepass $PASSWORD" > $REDIS_CONF/redis.conf && \
-    echo "maxclients 1" >> $REDIS_CONF/redis.conf && \
-    echo "protected-mode yes" >> $REDIS_CONF/redis.conf && \
-    echo "user ubuntu on allcommands allkeys allchannels" >> $REDIS_CONF/redis.conf
+    chown -R ubuntu:ubuntu $REDIS_HOME
 
 ### App
 WORKDIR $APP_HOME
-COPY . .
-RUN chown ubuntu:ubuntu -R $APP_HOME
+COPY ./app .
 RUN rm -rf dist && rm -rf ./node_modules && rm -rf ./package-lock.json
+RUN mkdir -p $APP_HOME/node_modules
+RUN chown ubuntu:ubuntu -R $APP_HOME 
 RUN npm i 
