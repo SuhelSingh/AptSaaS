@@ -55,14 +55,14 @@ WORKDIR $REDIS_HOME
 ENV REDIS_CONF=$REDIS_HOME/conf
 ENV REDIS_DATA=$REDIS_HOME/data
 ENV REDIS_LOGS=$REDIS_HOME/logs
-COPY ./redis .
+COPY redis .
 
 RUN mkdir -p $REDIS_CONF $REDIS_DATA $REDIS_LOGS && \
     chown -R ubuntu:ubuntu $REDIS_HOME
 
 ### App
 WORKDIR $APP_HOME
-COPY ./app .
+COPY app .
 RUN rm -rf dist && rm -rf ./node_modules && rm -rf ./package-lock.json
 RUN mkdir -p $APP_HOME/node_modules
 RUN chown ubuntu:ubuntu -R $APP_HOME 
