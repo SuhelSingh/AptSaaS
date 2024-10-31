@@ -1,0 +1,27 @@
+{
+    "name": "RAX Single Host Build",
+    "build": {
+      "dockerfile": "dockerfile",
+      "context": "."
+    },
+    "features": {
+        "ghcr.io/devcontainers-contrib/features/wireguard-apt-get:1": {}
+    },
+    "forwardPorts": [3000, 5432, 8080, 51820], 
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "GitHub.copilot",
+          "GitHub.copilot-chat",
+          "ms-python.python",
+          "ms-python.vscode-pylance",
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode",
+          "ms-vscode.vscode-typescript-next",
+          "VisualStudioExptTeam.vscodeintellicode",
+          "eamodio.gitlens"
+        ]
+      }
+    },
+    "remoteUser": "ubuntu"
+  }
